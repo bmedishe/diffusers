@@ -3,7 +3,7 @@ import sys
 
 
 sys.path.append(".")
-from base_classes import TextToImageBenchmark, TurboTextToImageBenchmark  # noqa: E402
+from base_classes import TextToImageBenchmark, TurboTextToImageBenchmark, TextToImageBenchmark_multi_image  # noqa: E402
 
 
 ALL_T2I_CKPTS = [
@@ -13,6 +13,8 @@ ALL_T2I_CKPTS = [
     "kandinsky-community/kandinsky-2-2-decoder",
     "warp-ai/wuerstchen",
     "stabilityai/sdxl-turbo",
+    "etri-vilab/koala-1b",
+    "black-forest-labs/FLUX.1-dev",
 ]
 
 
@@ -24,15 +26,25 @@ if __name__ == "__main__":
         default="Lykon/DreamShaper",
         choices=ALL_T2I_CKPTS,
     )
+    parser.add_argument(
+        "--dtype",
+        type=str,
+        default="FP16",
+        choices=("FP16", "FP32", "BF16"),
+    )
     parser.add_argument("--batch_size", type=int, default=1)
     parser.add_argument("--num_inference_steps", type=int, default=50)
     parser.add_argument("--model_cpu_offload", action="store_true")
     parser.add_argument("--run_compile", action="store_true")
+    parser.add_argument("--no_of_images", type=int, default=1)
+    parser.add_argument("--resolution", type=int, default=1024)
     args = parser.parse_args()
 
     benchmark_cls = None
     if "turbo" in args.ckpt:
         benchmark_cls = TurboTextToImageBenchmark
+    elif args.no_of_images > 1:
+        benchmark_cls = TextToImageBenchmark_multi_image
     else:
         benchmark_cls = TextToImageBenchmark
 
